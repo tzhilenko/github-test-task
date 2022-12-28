@@ -1,0 +1,68 @@
+swagger: '2.0'
+info:
+  description: Allows to get list of not fork repositories for user in github
+  version: '0.1'
+  title: GithubRepoRetriever
+host: localhost:8080
+basePath: /github-repo-retriever/v1
+paths:
+  /github/repositories/{username}:
+    get:
+      summary: api to get list of non fork repositories for given username
+      produces:
+        - application/json
+      parameters:
+        - name: username
+          in: path
+          description: 'Username to get list of repositories'
+          required: true
+          type: string
+      responses:
+        '200':
+          description: 'Ok'
+          schema:
+            $ref: '#/definitions/repository'
+        '404':
+          description: User not found error
+          examples: {status: 404, message: "User not found"}
+          schema:
+            $ref: '#/definitions/error'
+        '406':
+          description: Content type not supported
+          examples: {status: 406, message: "Content type not supported, allowed content type: application/json" }
+          schema:
+            $ref: '#/definitions/error'
+        '500':
+          description: Internal server error
+          examples: {status: 500, message: "Could not get repositories for user, error message: error" }
+          schema:
+            $ref: '#/definitions/error'
+definitions:
+  repository:
+    type: object
+    required: [name, owner, branches]
+    properties:
+      name:
+        type: string
+      owner:
+        type: string
+      branches:
+        type: array
+        items:
+          $ref: "#/definitions/branch"
+  branch:
+    type: object
+    required: [name, lastCommitSha]
+    properties:
+      name:
+        type: string
+      lastCommitSHA:
+        type: string
+  error:
+    type: object
+    required: [status, message]
+    properties:
+      status:
+        type: integer
+      message:
+        type: string

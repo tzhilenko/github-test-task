@@ -1,0 +1,106 @@
+openapi: 3.0.0
+info:
+  description: Allows to get list of not fork repositories for user in github
+  version: 0.0.1
+  title: GithubRepoRetriever
+paths:
+  /github/repositories/{username}:
+    get:
+      summary: api to get list of non fork repositories for given username
+      parameters:
+        - name: username
+          in: path
+          description: Username to get list of repositories
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/repository'
+        '404':
+          description: User not found error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+            status:
+              examples:
+                response:
+                  value: 404
+            message:
+              examples:
+                response:
+                  value: User not found
+        '406':
+          description: Content type not supported
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+            status:
+              examples:
+                response:
+                  value: 406
+            message:
+              examples:
+                response:
+                  value: >-
+                    Content type not supported, allowed content type:
+                    application/json
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+            status:
+              examples:
+                response:
+                  value: 500
+            message:
+              examples:
+                response:
+                  value: 'Could not get repositories for user, error message: error'
+servers:
+  - url: //localhost:8080/github-repo-retriever/v1
+components:
+  schemas:
+    repository:
+      type: object
+      required:
+        - name
+        - owner
+        - branches
+      properties:
+        name:
+          type: string
+        owner:
+          type: string
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/branch'
+    branch:
+      type: object
+      required:
+        - name
+        - lastCommitSha
+      properties:
+        name:
+          type: string
+        lastCommitSHA:
+          type: string
+    error:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
